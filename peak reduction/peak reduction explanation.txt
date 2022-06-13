@@ -1,0 +1,35 @@
+PEAK REDUCTION
+
+There are three functions:
+	- fitBattery
+	- findBase
+	- sliceTask.
+
+Structure:
+	- fitBattery is the entry and backbone. It calls first findBase and then sliceTask, and might finally call itself. There is a safety exit to stop the recursion, but ideally this will be unnecessary.
+	- findBase might call itself. The recursion is exited when the result is within a certain margin of fit, which will always be reached in a finite number of steps if the margin is properly defined between 0 and 1. findBase yields input for sliceTask.
+	- sliceTask doesn't call other functions.
+
+Pseudo code:
+
+fitBattery( task, solution so far, depth of recursion ){
+	- determine baseline load level with findBase, referring to the load differential or peak height
+	- divide the task into subtasks with sliceTask, referring to the baseline
+	- for each subtask: if it is resolved, then add it to the solution, else submit it to analysis with fitBattery
+	- return solution
+}
+
+findBase( task, peak, base, depth of recursion ){
+	- assume that the battery charges on the load below the baseline, and discharges on the load above the baseline
+	- if the task is not fulfilled, then adjust the baseline and try again with findBase, thus recursively converging on a suitable base
+	- each step size is half the previous one
+	- disregarding battery capacity here
+	- return base
+}
+
+sliceTask( task, base ){
+	- loop through the load curve for the time of the task
+	- each stretch of charging or discharging is considerd one subtask
+	- if the battery state goes out of bounds, then the subtask is marked as unresolved, else as resolved
+	- return subtasks
+}
