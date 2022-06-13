@@ -1,0 +1,78 @@
+PRICE OPTMIZATION
+
+There are seven functions:
+	- fitBattery
+	- findBase
+	- sliceTask
+	- correctLast
+	- sliceFlat
+	- sliceAlt
+	- sliceOne.
+
+Structure:
+	- fitBattery is the entry and backbone. It calls first findBase and then sliceTask or sliceFlat, and might finally call itself. There is a safety exit to stop the recursion, but ideally this will be unnecessary.
+	- findBase doesn't call other functions. The result determines whether in fitBattery either sliceTask or sliceFlat is called, and, if the former, yields input for sliceTask.
+	- sliceTask is wrapped up by calling correctLast. Also, sliceAlt and sliceOne are called from sliceTask in case it would return its original argument.
+	- correctLast might call itself. As it merges the two last elements of an array, the recursion will terminate. in any case.
+	- sliceFlat, sliceAlt and sliceOne deal with fringe cases. They don't call other functions.
+
+Pseudo code:
+
+fitBattery( task, solution so far, depth of recursion ){
+	- determine baseline price level with findBase
+	- divide the task into subtasks with sliceTask, referring to the baseline
+	- however, in case of a 'flat' curve, resolve the task with sliceFlat, referring to the latest power going into this task
+	- for each subtask: if it is resolved, then add it to the solution, else submit it to analysis with fitBattery
+	- return solution
+}
+
+findBase( task ){
+	- determine price level such that below the battery has to charge and above it has to discharge, assuming full power throughout
+	- this is called the baseline or base
+	- disregarding battery capacity here
+	- if the price curve is flat, then no baseline can be determined and it is set to the string 'flat'
+	- return base
+}
+
+sliceTask( task, base ){
+	- loop through the price curve for the time of the task
+	- each stretch of charging or discharging is considerd one subtask
+	- full power is assumed throughout
+	- if the battery state goes out of bounds, then the subtask is marked as unresolved, else as resolved
+	- finally, check if the desired end state can actually be reached with correctLast
+	- if there is only one subtask equal to the original, then try sliceAlt or sliceOne
+	- return subtasks
+}
+
+correctLast( task, subtasks ){
+	- in case the desired end state cannot be reached in the final subtask, it is merged with the penultimate one
+	- this new final subtask is checked in turn with correctLast
+	- return subtasks
+}
+
+sliceFlat( task, prev ){
+	- if the curve is considered flat, then the task is resolved at once in at most three subtasks:
+		- a main subtask to charge or discharge at full power (resolved)
+		- a remainder at less than full power (resolved)
+		- idle time (resolved)
+	- 'prev', or the latest power before this task, is used as indicator for ordering those three parts, to make the most of a monotonous series
+	- return subtasks
+}
+
+sliceAlt( task, base ){
+	- if sliceTask would have suggested to divide the task into two but the first subtask brings the end state out of reach for the second, then sliceTask falters, but findBase won't offer a better cue
+	- e.g. when the task has the same initial and end state, over three time units, and the baseline suggests to group the first two time units, then that leaves the third time unit with an impossible task
+	- an alternative function is required to make at least some progress
+	- this function breaks the task into two subtasks:
+		- a main subtask, with the same power as the first subtask from sliceTask, but one time unit shorter (un/resolved)
+		- the remainder (unresolved)
+	- return subtasks
+}
+
+sliceOne( task, base ){
+	- if the solution should be full power except for one time unit, then sliceTask and sliceAlt both falter
+	- this function resolves the task at once in two or three subtasks:
+		- one or two main subtasks to charge or discharge at full power (resolved)
+		- the remainder at less than full power, which should be placed at min or max of the curve, which could divide the main task into two (resolved)
+	- return subtasks
+}
