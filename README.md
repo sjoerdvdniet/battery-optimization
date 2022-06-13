@@ -1,5 +1,5 @@
 # Battery optimization
-Here a battery optimization technique is offered. It can be more generally applied to similar questions comprising containers and flows. There are two slightly algorithms: one optimizes the battery with respect to a load curve, doing peak reduction, the other with respect to a price curve, for maximum yield. At the heart is the same core idea, however.
+Here a battery optimization technique is offered. It can be more generally applied to similar questions comprising containers and flows. There are, in fact, two algorithms: one optimizes the battery with respect to a load curve, doing peak reduction, the other with respect to a price curve, for maximum yield. At the heart is the same core idea, however.
 
 # Peak reduction
 Given a load curve and a battery, this algorithm computes how to employ the battery such that the load curve is smoothed out, effectively shaving peaks, both up and down. The battery charges when the load is low (or with excess supply), and it discharges when load is high (or with short supply). Timing is everything, as you wish to avoid that the battery is out of capacity when the real peak has yet to come. The battery acts as medium, connecting demand and supply which peak at disparate moments. Inputs are battery capacity, its initial state, its desired end state and the load curve.
